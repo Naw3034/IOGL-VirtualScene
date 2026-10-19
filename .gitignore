@@ -1,0 +1,7 @@
+build/
+build-*/
+*.mp4
+*.srt
+.vs/
+out/
+.DS_Store
