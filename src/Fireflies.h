@@ -1,8 +1,3 @@
-//-----------------------------------------------------------------------------
-// Particle system: fireflies wandering over the square at night.
-// Rendered as additive point sprites into the HDR buffer, so they glow
-// thanks to the bloom pass.
-//-----------------------------------------------------------------------------
 #ifndef FIREFLIES_H
 #define FIREFLIES_H
 
@@ -34,9 +29,9 @@ private:
 
 	int mCount;
 	std::vector<Particle> mParticles;
-	std::vector<glm::vec4> mGpuData;	// xyz = position, w = brightness
+	std::vector<glm::vec4> mGpuData;
 	GLuint mVAO = 0, mVBO = 0;
 	ShaderProgram mShader;
 };
 
-#endif // FIREFLIES_H
+#endif

@@ -1,6 +1,3 @@
-//-----------------------------------------------------------------------------
-// Mesh class - Wavefront OBJ loader + GPU buffers
-//-----------------------------------------------------------------------------
 #include "Mesh.h"
 
 #include <cstdio>
@@ -14,7 +11,6 @@ namespace
 {
 	struct FaceIndex { int v = 0, vt = 0, vn = 0; };
 
-	// Parses "v", "v/vt", "v//vn" or "v/vt/vn"
 	FaceIndex parseFaceToken(const std::string& token)
 	{
 		FaceIndex idx;
@@ -31,7 +27,6 @@ namespace
 		return idx;
 	}
 
-	// OBJ indices are 1-based; negative values are relative to the end of the list
 	int resolve(int index, size_t count)
 	{
 		if (index > 0) return index - 1;
@@ -51,9 +46,6 @@ Mesh::~Mesh()
 	if (mVBO) glDeleteBuffers(1, &mVBO);
 }
 
-//-----------------------------------------------------------------------------
-// Loads a Wavefront OBJ model (geometry only, materials are set in the scene)
-//-----------------------------------------------------------------------------
 bool Mesh::loadOBJ(const std::string& filename)
 {
 	std::ifstream fin(filename);
@@ -113,7 +105,6 @@ bool Mesh::loadOBJ(const std::string& filename)
 				hasNormal.push_back(okNormal);
 			}
 
-			// Triangle fan: (0, i, i+1)
 			for (size_t i = 1; i + 1 < polygon.size(); ++i)
 			{
 				Vertex tri[3] = { polygon[0], polygon[i], polygon[i + 1] };
@@ -139,9 +130,6 @@ bool Mesh::loadOBJ(const std::string& filename)
 	return (mLoaded = true);
 }
 
-//-----------------------------------------------------------------------------
-// Builds a flat square on the XZ plane centred at the origin
-//-----------------------------------------------------------------------------
 void Mesh::createPlane(float size, float uvRepeat)
 {
 	const float h = size * 0.5f;
@@ -155,9 +143,6 @@ void Mesh::createPlane(float size, float uvRepeat)
 	mLoaded = true;
 }
 
-//-----------------------------------------------------------------------------
-// Uploads the vertices to a VBO and describes the layout in a VAO
-//-----------------------------------------------------------------------------
 void Mesh::initBuffers()
 {
 	mMin = mMax = mVertices[0].position;

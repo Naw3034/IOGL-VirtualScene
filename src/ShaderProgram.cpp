@@ -1,6 +1,3 @@
-//-----------------------------------------------------------------------------
-// GLSL shader manager class
-//-----------------------------------------------------------------------------
 #include "ShaderProgram.h"
 #include <fstream>
 #include <iostream>
@@ -8,26 +5,15 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-//-----------------------------------------------------------------------------
-// Constructor
-//-----------------------------------------------------------------------------
 ShaderProgram::ShaderProgram()
 	: mHandle(0)
 {}
 
-
-//-----------------------------------------------------------------------------
-// Destructor
-//-----------------------------------------------------------------------------
 ShaderProgram::~ShaderProgram()
 {
-	// Delete the program
 	glDeleteProgram(mHandle);
 }
 
-//-----------------------------------------------------------------------------
-// Loads vertex and fragment shaders
-//-----------------------------------------------------------------------------
 bool ShaderProgram::loadShaders(const char* vsFilename, const char* fsFilename)
 {
 	string vsString = fileToString(vsFilename);
@@ -60,7 +46,6 @@ bool ShaderProgram::loadShaders(const char* vsFilename, const char* fsFilename)
 	glLinkProgram(mHandle);
 	ok = checkCompileErrors(mHandle, PROGRAM, string(vsFilename) + " + " + fsFilename) && ok;
 
-
 	glDeleteShader(vs);
 	glDeleteShader(fs);
 
@@ -69,16 +54,11 @@ bool ShaderProgram::loadShaders(const char* vsFilename, const char* fsFilename)
 	return ok;
 }
 
-//-----------------------------------------------------------------------------
-// Opens and reads contents of ASCII file to a string.  Returns the string.
-// Not good for very large files.
-//-----------------------------------------------------------------------------
 string ShaderProgram::fileToString(const string& filename)
 {
 	std::stringstream ss;
 	std::ifstream file;
 
-	// Enable ifstream object exceptions
     file.exceptions (std::ifstream::failbit | std::ifstream::badbit);
 	try
 	{
@@ -86,7 +66,6 @@ string ShaderProgram::fileToString(const string& filename)
 
 		if (!file.fail())
 		{
-			// Using a std::stringstream is easier than looping through each line of the file
 			ss << file.rdbuf();
 		}
 
@@ -100,18 +79,12 @@ string ShaderProgram::fileToString(const string& filename)
 	return ss.str();
 }
 
-//-----------------------------------------------------------------------------
-// Activate the shader program
-//-----------------------------------------------------------------------------
 void ShaderProgram::use()
 {
 	if (mHandle > 0)
 		glUseProgram(mHandle);
 }
 
-//-----------------------------------------------------------------------------
-// Checks for shader compiler errors
-//-----------------------------------------------------------------------------
 bool ShaderProgram::checkCompileErrors(GLuint shader, ShaderType type, const string& label)
 {
 	int status = 0;
@@ -124,8 +97,7 @@ bool ShaderProgram::checkCompileErrors(GLuint shader, ShaderType type, const str
 			GLint length = 0;
 			glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &length);
 
-			// The length includes the NULL character
-			string errorLog(length, ' ');	// Resize and fill with space character
+			string errorLog(length, ' ');
 			glGetProgramInfoLog(shader, length, &length, &errorLog[0]);
 			std::cerr << "Error! Shader program failed to link (" << label << "): " << errorLog << std::endl;
 		}
@@ -138,8 +110,7 @@ bool ShaderProgram::checkCompileErrors(GLuint shader, ShaderType type, const str
 			GLint length = 0;
 			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
 
-			// The length includes the NULL character
-			string errorLog(length, ' ');  // Resize and fill with space character
+			string errorLog(length, ' ');
 			glGetShaderInfoLog(shader, length, &length, &errorLog[0]);
 			std::cerr << "Error! Shader failed to compile (" << label << "): " << errorLog << std::endl;
 		}
@@ -147,84 +118,53 @@ bool ShaderProgram::checkCompileErrors(GLuint shader, ShaderType type, const str
 	return status == GL_TRUE;
 }
 
-//-----------------------------------------------------------------------------
-// Returns the active shader program
-//-----------------------------------------------------------------------------
 GLuint ShaderProgram::getProgram() const
 {
 	return mHandle;
 }
 
-//-----------------------------------------------------------------------------
-// Sets a glm::vec2 shader uniform
-//-----------------------------------------------------------------------------
 void ShaderProgram::setUniform(const GLchar* name, const glm::vec2& v)
 {
 	GLint loc = getUniformLocation(name);
 	glUniform2f(loc, v.x, v.y);
 }
 
-//-----------------------------------------------------------------------------
-// Sets a glm::vec3 shader uniform
-//-----------------------------------------------------------------------------
 void ShaderProgram::setUniform(const GLchar* name, const glm::vec3& v)
 {
 	GLint loc = getUniformLocation(name);
 	glUniform3f(loc, v.x, v.y, v.z);
 }
 
-//-----------------------------------------------------------------------------
-// Sets a glm::vec4 shader uniform
-//-----------------------------------------------------------------------------
 void ShaderProgram::setUniform(const GLchar* name, const glm::vec4& v)
 {
 	GLint loc = getUniformLocation(name);
 	glUniform4f(loc, v.x, v.y, v.z, v.w);
 }
 
-//-----------------------------------------------------------------------------
-// Sets a glm::mat3 shader uniform (normal matrix)
-//-----------------------------------------------------------------------------
 void ShaderProgram::setUniform(const GLchar* name, const glm::mat3& m)
 {
 	glUniformMatrix3fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(m));
 }
 
-//-----------------------------------------------------------------------------
-// Sets a glm::mat4 shader uniform
-//-----------------------------------------------------------------------------
 void ShaderProgram::setUniform(const GLchar* name, const glm::mat4& m)
 {
 	GLint loc = getUniformLocation(name);
 
-	// loc = location of uniform in shader
-	// count = how many matrices (1 if not an array of mats)
-	// transpose = False for opengl because column major
-	// value = the matrix to set for the uniform
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m));
 }
 
-//-----------------------------------------------------------------------------
-// Sets a GLfloat shader uniform
-//-----------------------------------------------------------------------------
 void ShaderProgram::setUniform(const GLchar* name, const GLfloat f)
 {
 	GLint loc = getUniformLocation(name);
 	glUniform1f(loc,f);
 }
 
-//-----------------------------------------------------------------------------
-// Sets a GLint shader uniform
-//-----------------------------------------------------------------------------
 void ShaderProgram::setUniform(const GLchar* name, const GLint v)
 {
 	GLint loc = getUniformLocation(name);
 	glUniform1i(loc,v);
 }
 
-//-----------------------------------------------------------------------------
-// Sets a GLint shader uniform that is specific to a texture unit
-//-----------------------------------------------------------------------------
 void ShaderProgram::setUniformSampler(const GLchar* name, const GLint& slot)
 {
 	glActiveTexture(GL_TEXTURE0 + slot);
@@ -233,21 +173,14 @@ void ShaderProgram::setUniformSampler(const GLchar* name, const GLint& slot)
 	glUniform1i(loc, slot);
 }
 
-//-----------------------------------------------------------------------------
-// Returns the uniform identifier given it's string name.
-// NOTE: Shader must be currently active first.
-//-----------------------------------------------------------------------------
 GLint ShaderProgram::getUniformLocation(const GLchar* name)
 {
 	std::map<string, GLint>::iterator it = mUniformLocations.find(name);
 
-	// Only need to query the shader program IF it doesn't already exist.
 	if (it == mUniformLocations.end())
 	{
-		// Find it and add it to the map
 		mUniformLocations[name] = glGetUniformLocation(mHandle, name);
 	}
 
-	// Return it
 	return mUniformLocations[name];
 }

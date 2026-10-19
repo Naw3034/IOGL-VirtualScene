@@ -1,6 +1,3 @@
-//-----------------------------------------------------------------------------
-// GLSL shader manager class
-//-----------------------------------------------------------------------------
 #ifndef SHADER_H
 #define SHADER_H
 
@@ -9,7 +6,6 @@
 #include "GL/glew.h"
 #include "glm/glm.hpp"
 using std::string;
-
 
 class ShaderProgram
 {
@@ -26,7 +22,6 @@ public:
 		PROGRAM
 	};
 
-	// Only supports vertex and fragment (this series will only have those two)
 	bool loadShaders(const char* vsFilename, const char* fsFilename);
 	void use();
 
@@ -41,7 +36,6 @@ public:
 	void setUniform(const GLchar* name, const GLint v);
 	void setUniformSampler(const GLchar* name, const GLint& slot);
 
-	// We are going to speed up looking for uniforms by keeping their locations in a map
 	GLint getUniformLocation(const GLchar * name);
 
 private:
@@ -49,8 +43,7 @@ private:
 	string fileToString(const string& filename);
 	bool checkCompileErrors(GLuint shader, ShaderType type, const string& label);
 
-	
 	GLuint mHandle;
 	std::map<string, GLint> mUniformLocations;
 };
-#endif // SHADER_H
+#endif

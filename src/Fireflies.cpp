@@ -1,6 +1,3 @@
-//-----------------------------------------------------------------------------
-// Firefly particles
-//-----------------------------------------------------------------------------
 #include "Fireflies.h"
 
 #include <cmath>
@@ -20,7 +17,7 @@ Fireflies::~Fireflies()
 
 bool Fireflies::init()
 {
-	std::mt19937 rng(42);	// fixed seed: same swarm every run (reproducible video)
+	std::mt19937 rng(42);
 	std::uniform_real_distribution<float> u01(0.0f, 1.0f);
 
 	for (int i = 0; i < mCount; ++i)
@@ -58,7 +55,7 @@ void Fireflies::update(float t)
 			0.45f * std::sin(t * p.freq.y + p.phase.y),
 			1.6f * std::cos(t * p.freq.z + p.phase.z));
 		float blink = 0.5f + 0.5f * std::sin(t * p.blinkSpeed + p.phase.x * 3.0f);
-		blink = blink * blink * blink;	// short flashes, long dark periods
+		blink = blink * blink * blink;
 		mGpuData[i] = glm::vec4(p.home + offset, 0.05f + blink);
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
@@ -72,8 +69,8 @@ void Fireflies::draw(const glm::mat4& view, const glm::mat4& projection, float v
 
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);	// additive
-	glDepthMask(GL_FALSE);			// test against the scene, but do not write
+	glBlendFunc(GL_ONE, GL_ONE);
+	glDepthMask(GL_FALSE);
 
 	mShader.use();
 	mShader.setUniform("view", view);

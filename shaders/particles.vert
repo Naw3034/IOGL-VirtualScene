@@ -1,9 +1,6 @@
-//-----------------------------------------------------------------------------
-// Firefly particles: point sprites whose size depends on the distance
-//-----------------------------------------------------------------------------
 #version 330 core
 
-layout (location = 0) in vec4 particle;	// xyz = position, w = brightness
+layout (location = 0) in vec4 particle;
 
 uniform mat4 view;
 uniform mat4 projection;

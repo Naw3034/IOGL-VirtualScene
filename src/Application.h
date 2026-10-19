@@ -1,8 +1,3 @@
-//-----------------------------------------------------------------------------
-// Application: window, input, camera modes and the rendering pipeline
-//
-//   shadow pass  ->  HDR pass (sky, lit scene, particles)  ->  bloom + tone mapping
-//-----------------------------------------------------------------------------
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
@@ -25,13 +20,13 @@
 
 struct AppOptions
 {
-	bool demo = false;				// play the scripted presentation in real time
-	std::string recordFile;			// non empty = offline rendering to a video
+	bool demo = false;
+	std::string recordFile;
 	int width = 1280;
 	int height = 720;
 	int fps = 30;
-	float startTime = 0.0f;			// part of the script to render (seconds)
-	float endTime = -1.0f;			// -1 = until the end of the script
+	float startTime = 0.0f;
+	float endTime = -1.0f;
 	bool fullscreen = false;
 };
 
@@ -50,7 +45,6 @@ private:
 	bool initWindow();
 	void printHelp() const;
 
-	// GLFW callbacks (forwarded to the instance through the window user pointer)
 	static void onKey(GLFWwindow* w, int key, int scancode, int action, int mods);
 	static void onScroll(GLFWwindow* w, double dx, double dy);
 	static void onFramebufferSize(GLFWwindow* w, int width, int height);
@@ -68,7 +62,6 @@ private:
 	GLFWwindow* mWindow = nullptr;
 	int mFbWidth = 0, mFbHeight = 0;
 
-	// Cameras
 	CameraMode mCameraMode = CameraMode::Free;
 	FPSCamera mFreeCamera{ glm::vec3(0.0f, 2.5f, 14.0f) };
 	OrbitCamera mOrbitCamera;
@@ -78,7 +71,6 @@ private:
 	bool mFirstMouse = true;
 	double mLastMouseX = 0.0, mLastMouseY = 0.0;
 
-	// World
 	Scene mScene;
 	Sky mSky;
 	Fireflies mFireflies;
@@ -87,11 +79,10 @@ private:
 	float mAnimTime = 0.0f;
 	float mScriptTime = 0.0f;
 
-	// Rendering
 	ShaderProgram mLightingShader, mDepthShader;
 	ShadowMap mShadowMap{ 2048 };
 	PostProcessor mPost;
 	VideoRecorder mRecorder;
 };
 
-#endif // APPLICATION_H
+#endif

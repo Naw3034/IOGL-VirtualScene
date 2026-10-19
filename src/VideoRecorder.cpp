@@ -1,6 +1,3 @@
-//-----------------------------------------------------------------------------
-// Video capture through an FFmpeg pipe
-//-----------------------------------------------------------------------------
 #include "VideoRecorder.h"
 
 #include <iostream>
@@ -22,7 +19,6 @@ bool VideoRecorder::open(const std::string& file, int width, int height, int fps
 	mHeight = height;
 	mPixels.resize((size_t)width * height * 3);
 
-	// OpenGL images start at the bottom row -> vflip
 	std::string cmd = "ffmpeg -y -loglevel error -f rawvideo -pix_fmt rgb24 -s " + std::to_string(width) + "x"
 		+ std::to_string(height) + " -r " + std::to_string(fps) + " -i - -vf vflip -c:v libx264 -preset medium"
 		+ " -crf 17 -pix_fmt yuv420p -movflags +faststart \"" + file + "\"";

@@ -1,8 +1,3 @@
-//-----------------------------------------------------------------------------
-// Resolves the path of a resource (shader, model, texture).
-// The program can be launched from the project folder, from the build folder
-// or from an IDE: we try the working directory first, then the source folder.
-//-----------------------------------------------------------------------------
 #ifndef PATHS_H
 #define PATHS_H
 
@@ -25,4 +20,4 @@ inline std::string resourcePath(const std::string& relative)
 	return relative;
 }
 
-#endif // PATHS_H
+#endif

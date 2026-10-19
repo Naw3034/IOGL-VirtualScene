@@ -1,11 +1,3 @@
-//-----------------------------------------------------------------------------
-// HDR rendering + post-processing
-//  1. the scene is rendered into a floating point (RGBA16F) framebuffer
-//  2. bright pass: keeps only the pixels brighter than 1.0 (half resolution)
-//  3. separable gaussian blur (ping-pong between two buffers) = bloom
-//  4. composite: scene + bloom, exposure, ACES tone mapping, gamma,
-//     vignette, fades, optional shadow map debug view
-//-----------------------------------------------------------------------------
 #ifndef POST_PROCESSOR_H
 #define POST_PROCESSOR_H
 
@@ -35,10 +27,10 @@ public:
 	bool init(int width, int height);
 	void resize(int width, int height);
 
-	void beginScene();							// render target = HDR buffer
-	void endScene(const PostSettings& s);		// bloom + composite to screen
+	void beginScene();
+	void endScene(const PostSettings& s);
 
-	void drawFullscreenTriangle() const;		// also used by the sky
+	void drawFullscreenTriangle() const;
 
 private:
 	void createTargets();
@@ -52,4 +44,4 @@ private:
 	ShaderProgram mBright, mBlur, mComposite;
 };
 
-#endif // POST_PROCESSOR_H
+#endif

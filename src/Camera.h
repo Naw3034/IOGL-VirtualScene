@@ -1,24 +1,16 @@
-//-----------------------------------------------------------------------------
-// Basic camera class including derived orbit-style and first person
-// shooter (FPS) style camera support
-//-----------------------------------------------------------------------------
 #ifndef CAMERA_H
 #define CAMERA_H
 
 #include "glm/glm.hpp"
 #include "glm/gtc/constants.hpp"
 
-
-//--------------------------------------------------------------
-// Abstract Camera Class
-//--------------------------------------------------------------
 class Camera
 {
 public:
 	glm::mat4 getViewMatrix() const;
 
 	virtual void setPosition(const glm::vec3& position) {}
-	virtual void rotate(float yaw, float pitch) {}  // in degrees
+	virtual void rotate(float yaw, float pitch) {}
 	virtual void move(const glm::vec3& offsetPos) {}
 
 	const glm::vec3& getLook() const;
@@ -28,7 +20,7 @@ public:
 	const glm::vec3& getTarget() const { return mTargetPos; }
 
 	float getFOV() const   { return mFOV; }
-	void setFOV(float fov) { mFOV = fov; }		// in degrees
+	void setFOV(float fov) { mFOV = fov; }
 
 protected:
 	Camera();
@@ -42,29 +34,22 @@ protected:
 	glm::vec3 mRight;
 	const glm::vec3 WORLD_UP;
 
-	// Euler Angles (in radians)
 	float mYaw;
 	float mPitch;
 
-	// Camera parameters
-	float mFOV; // degrees
+	float mFOV;
 };
 
-//--------------------------------------------------------------
-// FPS Camera Class
-//--------------------------------------------------------------
 class FPSCamera : public Camera
 {
 public:
 
-	FPSCamera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), float yaw = glm::pi<float>(), float pitch = 0.0f); // (yaw) initial angle faces -Z
+	FPSCamera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), float yaw = glm::pi<float>(), float pitch = 0.0f);
 
 	virtual void setPosition(const glm::vec3& position);
-	virtual void rotate(float yaw, float pitch);	// in degrees
+	virtual void rotate(float yaw, float pitch);
 	virtual void move(const glm::vec3& offsetPos);
 
-	// Points the camera towards a world position (used when leaving the
-	// cinematic mode so the free camera continues from the same view)
 	void lookAt(const glm::vec3& target);
 
 private:
@@ -72,19 +57,14 @@ private:
 	void updateCameraVectors();
 };
 
-
-//--------------------------------------------------------------
-// Orbit Camera Class
-//--------------------------------------------------------------
 class OrbitCamera : public Camera
 {
 public:
 
 	OrbitCamera();
 
-	virtual void rotate(float yaw, float pitch);    // in degrees
+	virtual void rotate(float yaw, float pitch);
 
-	// Camera Controls
 	void setLookAt(const glm::vec3& target);
 	void setRadius(float radius);
 	float getRadius() const { return mRadius; }
@@ -93,7 +73,6 @@ private:
 
 	void updateCameraVectors();
 
-	// Camera parameters
 	float mRadius;
 };
-#endif //CAMERA_H
+#endif

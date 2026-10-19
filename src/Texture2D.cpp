@@ -1,6 +1,3 @@
-//-----------------------------------------------------------------------------
-// Simple 2D texture class
-//-----------------------------------------------------------------------------
 #include "Texture2D.h"
 
 #include <cassert>
@@ -19,13 +16,10 @@ Texture2D::~Texture2D()
 	if (mTexture) glDeleteTextures(1, &mTexture);
 }
 
-//-----------------------------------------------------------------------------
-// Loads an image file (png, jpg, tga...) with stb_image
-//-----------------------------------------------------------------------------
 bool Texture2D::loadTexture(const std::string& fileName, bool generateMipMaps)
 {
 	int width, height, components;
-	stbi_set_flip_vertically_on_load(true);	// OpenGL expects the first row at the bottom
+	stbi_set_flip_vertically_on_load(true);
 	unsigned char* imageData = stbi_load(fileName.c_str(), &width, &height, &components, STBI_rgb_alpha);
 	if (imageData == nullptr)
 	{
@@ -41,7 +35,6 @@ bool Texture2D::loadTexture(const std::string& fileName, bool generateMipMaps)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, generateMipMaps ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	// Anisotropic filtering keeps the floor tiles sharp at grazing angles
 	if (GLEW_EXT_texture_filter_anisotropic)
 	{
 		GLfloat maxAniso = 1.0f;
@@ -58,9 +51,6 @@ bool Texture2D::loadTexture(const std::string& fileName, bool generateMipMaps)
 	return true;
 }
 
-//-----------------------------------------------------------------------------
-// Creates a 1x1 texture of a single colour (e.g. "no specular map" = white)
-//-----------------------------------------------------------------------------
 void Texture2D::createSolidColor(const glm::vec4& color)
 {
 	unsigned char px[4];

@@ -1,6 +1,3 @@
-//-----------------------------------------------------------------------------
-// Shadow mapping for the directional light
-//-----------------------------------------------------------------------------
 #include "ShadowMap.h"
 
 #include <cmath>
@@ -25,7 +22,6 @@ bool ShadowMap::init()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, mSize, mSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	// Outside the map = "not in shadow"
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	const float border[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -34,7 +30,7 @@ bool ShadowMap::init()
 	glGenFramebuffers(1, &mFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, mFBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mDepthTex, 0);
-	glDrawBuffer(GL_NONE);	// depth only
+	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	bool ok = glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -49,8 +45,6 @@ void ShadowMap::update(const glm::vec3& lightDir, const glm::vec3& center, float
 	glm::vec3 up = std::fabs(dir.y) > 0.99f ? glm::vec3(0, 0, 1) : glm::vec3(0, 1, 0);
 	glm::mat4 view = glm::lookAt(eye, center, up);
 
-	// Snap the projection to whole texels: avoids shimmering shadow edges
-	// when the light direction slowly changes (day/night cycle)
 	float texel = (2.0f * radius) / (float)mSize;
 	glm::vec4 origin = view * glm::vec4(0, 0, 0, 1);
 	glm::vec2 snap(std::floor(origin.x / texel) * texel - origin.x, std::floor(origin.y / texel) * texel - origin.y);
@@ -64,7 +58,7 @@ void ShadowMap::begin()
 	glViewport(0, 0, mSize, mSize);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_POLYGON_OFFSET_FILL);
-	glPolygonOffset(2.0f, 4.0f);	// reduces "shadow acne"
+	glPolygonOffset(2.0f, 4.0f);
 }
 
 void ShadowMap::end()

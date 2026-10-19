@@ -1,6 +1,3 @@
-//-----------------------------------------------------------------------------
-// Light sources (Blinn-Phong model, same structures as in the GLSL shader)
-//-----------------------------------------------------------------------------
 #ifndef LIGHTS_H
 #define LIGHTS_H
 
@@ -10,7 +7,7 @@
 
 struct DirectionalLight
 {
-	glm::vec3 direction{ 0.0f, -1.0f, 0.0f };	// direction the light travels
+	glm::vec3 direction{ 0.0f, -1.0f, 0.0f };
 	glm::vec3 diffuse{ 1.0f };
 	glm::vec3 specular{ 1.0f };
 
@@ -27,7 +24,7 @@ struct PointLight
 	glm::vec3 position{ 0.0f };
 	glm::vec3 diffuse{ 1.0f };
 	glm::vec3 specular{ 1.0f };
-	float constant = 1.0f;		// attenuation = 1 / (Kc + Kl*d + Kq*d^2)
+	float constant = 1.0f;
 	float linear = 0.14f;
 	float exponent = 0.07f;
 
@@ -48,7 +45,7 @@ struct SpotLight
 	glm::vec3 direction{ 0.0f, 0.0f, -1.0f };
 	glm::vec3 diffuse{ 1.0f };
 	glm::vec3 specular{ 1.0f };
-	float innerAngle = 12.0f;	// degrees
+	float innerAngle = 12.0f;
 	float outerAngle = 18.0f;
 	float constant = 1.0f;
 	float linear = 0.07f;
@@ -70,4 +67,4 @@ struct SpotLight
 	}
 };
 
-#endif // LIGHTS_H
+#endif

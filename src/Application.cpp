@@ -1,6 +1,3 @@
-//-----------------------------------------------------------------------------
-// Application: window, input, camera modes and rendering pipeline
-//-----------------------------------------------------------------------------
 #include "Application.h"
 
 #include <cmath>
@@ -14,7 +11,7 @@
 namespace
 {
 	const char* APP_TITLE = "IOGL - La petite place";
-	const float MOVE_SPEED = 5.0f;			// units per second
+	const float MOVE_SPEED = 5.0f;
 	const float MOUSE_SENSITIVITY = 0.1f;
 	const double ZOOM_SENSITIVITY = -3.0;
 	const char* MODE_NAMES[] = { "Libre (FPS)", "Orbite", "Visite cinematique" };
@@ -26,9 +23,6 @@ Application::~Application()
 	if (mWindow) glfwTerminate();
 }
 
-//-----------------------------------------------------------------------------
-// Initialisation
-//-----------------------------------------------------------------------------
 bool Application::init(const AppOptions& options)
 {
 	mOptions = options;
@@ -68,6 +62,11 @@ bool Application::init(const AppOptions& options)
 
 bool Application::initWindow()
 {
+#if defined(__linux__) && defined(GLFW_PLATFORM_X11)
+	// GLEW needs GLX: force X11 (needed under WSL / Wayland)
+	if (glfwPlatformSupported(GLFW_PLATFORM_X11))
+		glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+#endif
 	if (!glfwInit())
 	{
 		std::cerr << "GLFW initialization failed" << std::endl;
@@ -103,12 +102,17 @@ bool Application::initWindow()
 	glfwSwapInterval(recording ? 0 : 1);
 
 	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK)
+	GLenum glewStatus = glewInit();
+#ifdef GLEW_ERROR_NO_GLX_DISPLAY
+	if (glewStatus == GLEW_ERROR_NO_GLX_DISPLAY)
+		glewStatus = GLEW_OK;
+#endif
+	if (glewStatus != GLEW_OK)
 	{
-		std::cerr << "Failed to initialize GLEW" << std::endl;
+		std::cerr << "Failed to initialize GLEW: " << glewGetErrorString(glewStatus) << std::endl;
 		return false;
 	}
-	glGetError();	// glewInit can leave a harmless GL_INVALID_ENUM
+	glGetError();
 
 	std::cout << "OpenGL " << glGetString(GL_VERSION) << " - " << glGetString(GL_RENDERER) << std::endl;
 
@@ -142,9 +146,6 @@ void Application::printHelp() const
 		"========================================================\n" << std::endl;
 }
 
-//-----------------------------------------------------------------------------
-// Input
-//-----------------------------------------------------------------------------
 void Application::onKey(GLFWwindow* w, int key, int, int action, int)
 {
 	static_cast<Application*>(glfwGetWindowUserPointer(w))->handleKey(key, action);
@@ -205,7 +206,6 @@ void Application::handleKey(int key, int action)
 
 void Application::setCameraMode(CameraMode mode)
 {
-	// Leaving the cinematic/orbit view: the free camera continues from there
 	CameraState current = currentCamera();
 	if (mode == CameraMode::Free)
 	{
@@ -241,7 +241,6 @@ void Application::processInput(float dt)
 		if (glm::length(move) > 0.0f)
 		{
 			mFreeCamera.move(glm::normalize(move) * MOVE_SPEED * dt);
-			// keep the eye above the ground
 			glm::vec3 p = mFreeCamera.getPosition();
 			if (p.y < 0.3f) mFreeCamera.move(glm::vec3(0.0f, 0.3f - p.y, 0.0f));
 		}
@@ -254,16 +253,12 @@ void Application::processInput(float dt)
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Simulation
-//-----------------------------------------------------------------------------
 void Application::update(float dt)
 {
 	const bool scripted = mOptions.demo || mRecorder.isOpen();
 
 	if (scripted)
 	{
-		// The script drives everything: animations are synchronised with it
 		mScript.apply(mScriptTime, mSettings, mScriptCamera, mScene.foxPosition());
 		mAnimTime = mScriptTime;
 	}
@@ -304,12 +299,9 @@ CameraState Application::currentCamera() const
 	return s;
 }
 
-//-----------------------------------------------------------------------------
-// Rendering
-//-----------------------------------------------------------------------------
 void Application::render()
 {
-	if (mFbWidth <= 0 || mFbHeight <= 0) return;	// minimised
+	if (mFbWidth <= 0 || mFbHeight <= 0) return;
 
 	const Environment& env = mScene.environment();
 	CameraState cam = currentCamera();
@@ -317,13 +309,11 @@ void Application::render()
 	glm::mat4 view = glm::lookAt(cam.position, cam.target, glm::vec3(0, 1, 0));
 	glm::mat4 projection = glm::perspective(glm::radians(cam.fov), (float)mFbWidth / (float)mFbHeight, 0.1f, 200.0f);
 
-	// The flashlight is held a bit below and to the right of the eye
 	SpotLight& torch = mScene.flashlight();
 	glm::vec3 right = glm::normalize(glm::cross(look, glm::vec3(0, 1, 0)));
 	torch.position = cam.position - glm::vec3(0.0f, 0.3f, 0.0f) + right * 0.2f;
 	torch.direction = look;
 
-	// 1) Shadow pass ------------------------------------------------------------
 	mShadowMap.update(mScene.mainLight().direction, glm::vec3(0.0f, 0.0f, 0.0f), 19.0f);
 	if (mSettings.shadows)
 	{
@@ -334,7 +324,6 @@ void Application::render()
 		mShadowMap.end();
 	}
 
-	// 2) HDR pass ---------------------------------------------------------------
 	mPost.beginScene();
 	mSky.draw(mPost, env, view, projection, mAnimTime);
 
@@ -357,7 +346,6 @@ void Application::render()
 		mFireflies.draw(view, projection, (float)mFbHeight, env.nightFactor);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	// 3) Post-processing --------------------------------------------------------
 	PostSettings post;
 	post.bloom = mSettings.bloom;
 	post.exposure = env.exposure * mSettings.exposureBias;
@@ -387,14 +375,10 @@ void Application::updateTitle(float dt)
 	frames = 0;
 }
 
-//-----------------------------------------------------------------------------
-// Main loop
-//-----------------------------------------------------------------------------
 int Application::run()
 {
 	if (mRecorder.isOpen())
 	{
-		// Offline rendering with a fixed time step
 		const float dt = 1.0f / (float)mOptions.fps;
 		const float end = mOptions.endTime > 0.0f ? mOptions.endTime : mScript.duration();
 		const int total = (int)std::ceil((end - mOptions.startTime) * mOptions.fps);
@@ -418,7 +402,7 @@ int Application::run()
 	while (!glfwWindowShouldClose(mWindow))
 	{
 		double now = glfwGetTime();
-		float dt = (float)glm::min(now - last, 0.1);	// clamp after a hiccup
+		float dt = (float)glm::min(now - last, 0.1);
 		last = now;
 
 		glfwPollEvents();

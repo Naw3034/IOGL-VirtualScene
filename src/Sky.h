@@ -1,7 +1,3 @@
-//-----------------------------------------------------------------------------
-// Procedural sky: colour gradient, sun, moon and twinkling stars.
-// Drawn as a full-screen triangle; each pixel computes its view ray.
-//-----------------------------------------------------------------------------
 #ifndef SKY_H
 #define SKY_H
 
@@ -21,4 +17,4 @@ private:
 	ShaderProgram mShader;
 };
 
-#endif // SKY_H
+#endif

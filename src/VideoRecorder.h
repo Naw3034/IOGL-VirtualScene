@@ -1,9 +1,3 @@
-//-----------------------------------------------------------------------------
-// Video capture: reads back every rendered frame (glReadPixels) and pipes it
-// into FFmpeg, which encodes an H.264 MP4. FFmpeg must be in the PATH.
-// Frames are produced with a fixed time step, so the video is perfectly
-// smooth whatever the speed of the computer.
-//-----------------------------------------------------------------------------
 #ifndef VIDEO_RECORDER_H
 #define VIDEO_RECORDER_H
 
@@ -17,7 +11,7 @@ public:
 	~VideoRecorder();
 
 	bool open(const std::string& file, int width, int height, int fps);
-	void captureFrame();	// reads the default framebuffer
+	void captureFrame();
 	void close();
 	bool isOpen() const { return mPipe != nullptr; }
 
@@ -27,4 +21,4 @@ private:
 	std::vector<unsigned char> mPixels;
 };
 
-#endif // VIDEO_RECORDER_H
+#endif

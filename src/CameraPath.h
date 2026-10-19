@@ -1,8 +1,3 @@
-//-----------------------------------------------------------------------------
-// Camera path made of keyframes (time, position, target) interpolated with
-// Catmull-Rom splines: the camera passes exactly through every keyframe
-// with a smooth (C1 continuous) trajectory.
-//-----------------------------------------------------------------------------
 #ifndef CAMERA_PATH_H
 #define CAMERA_PATH_H
 
@@ -34,4 +29,4 @@ private:
 	std::vector<Key> mKeys;
 };
 
-#endif // CAMERA_PATH_H
+#endif

@@ -1,6 +1,3 @@
-//-----------------------------------------------------------------------------
-// Procedural sky
-//-----------------------------------------------------------------------------
 #include "Sky.h"
 
 #include "Paths.h"
@@ -14,7 +11,6 @@ bool Sky::init()
 
 void Sky::draw(const PostProcessor& post, const Environment& env, const glm::mat4& view, const glm::mat4& projection, float time)
 {
-	// Remove the translation from the view matrix: the sky is infinitely far away
 	glm::mat4 rotationOnly = glm::mat4(glm::mat3(view));
 	glm::mat4 invViewProj = glm::inverse(projection * rotationOnly);
 

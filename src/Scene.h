@@ -1,7 +1,3 @@
-//-----------------------------------------------------------------------------
-// Scene: loads the models / textures / materials, places the objects,
-// animates them and drives the lights (day/night cycle, lanterns, wisps).
-//-----------------------------------------------------------------------------
 #ifndef SCENE_H
 #define SCENE_H
 
@@ -17,16 +13,15 @@
 #include "ShaderProgram.h"
 #include "Texture2D.h"
 
-// Surface description used by the Blinn-Phong shader
 struct Material
 {
 	const Texture2D* diffuseMap = nullptr;
-	const Texture2D* specularMap = nullptr;	// red channel = specular mask
+	const Texture2D* specularMap = nullptr;
 	const Texture2D* emissiveMap = nullptr;
-	glm::vec3 tint{ 1.0f };					// multiplies the diffuse texture
+	glm::vec3 tint{ 1.0f };
 	glm::vec3 specular{ 0.5f };
 	float shininess = 32.0f;
-	glm::vec3 emissive{ 0.0f };				// multiplies the emissive map (HDR)
+	glm::vec3 emissive{ 0.0f };
 	glm::vec2 uvScale{ 1.0f };
 };
 
@@ -40,10 +35,9 @@ struct SceneObject
 	bool visible = true;
 };
 
-// Sky / fog / ambient values computed from the time of day
 struct Environment
 {
-	glm::vec3 sunDir{ 0, 1, 0 };	// direction TOWARDS the sun
+	glm::vec3 sunDir{ 0, 1, 0 };
 	glm::vec3 moonDir{ 0, -1, 0 };
 	glm::vec3 sunColor{ 1.0f };
 	glm::vec3 zenithColor{ 0.2f, 0.4f, 0.8f };
@@ -51,9 +45,9 @@ struct Environment
 	glm::vec3 ambient{ 0.2f };
 	glm::vec3 fogColor{ 0.5f };
 	float fogDensity = 0.02f;
-	float dayFactor = 1.0f;			// 1 = full day
-	float nightFactor = 0.0f;		// 1 = full night
-	float lampsOn = 0.0f;			// street lights intensity 0..1
+	float dayFactor = 1.0f;
+	float nightFactor = 0.0f;
+	float lampsOn = 0.0f;
 	float exposure = 1.0f;
 };
 
@@ -65,7 +59,6 @@ public:
 	bool load();
 	void update(float animTime, const RenderSettings& settings);
 
-	// Binds the material and draws every object. depthOnly = shadow pass.
 	void draw(ShaderProgram& shader, bool depthOnly) const;
 	void applyLights(ShaderProgram& shader) const;
 
@@ -94,7 +87,6 @@ private:
 
 	Texture2D mWhite, mBlack;
 
-	// Indices of animated objects
 	int mRobot = -1, mBunny = -1, mFox = -1, mBall = -1;
 	int mWisps[2] = { -1, -1 };
 	std::vector<int> mPins;
@@ -105,7 +97,6 @@ private:
 	Material* mBulbMat = nullptr;
 	Material* mWispMat[2] = { nullptr, nullptr };
 
-	// Lights
 	Environment mEnv;
 	DirectionalLight mMainLight;
 	std::vector<PointLight> mPointLights;
@@ -114,4 +105,4 @@ private:
 	glm::vec3 mFoxPos{ 0.0f };
 };
 
-#endif // SCENE_H
+#endif

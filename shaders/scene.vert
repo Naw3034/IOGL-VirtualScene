@@ -1,6 +1,3 @@
-//-----------------------------------------------------------------------------
-// Vertex shader - lit scene
-//-----------------------------------------------------------------------------
 #version 330 core
 
 layout (location = 0) in vec3 pos;
@@ -8,10 +5,10 @@ layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 texCoord;
 
 uniform mat4 model;
-uniform mat3 normalMatrix;		// transpose(inverse(model)), computed on the CPU
+uniform mat3 normalMatrix;
 uniform mat4 view;
 uniform mat4 projection;
-uniform mat4 lightSpaceMatrix;	// world -> shadow map
+uniform mat4 lightSpaceMatrix;
 uniform vec2 uvScale;
 
 out vec3 FragPos;

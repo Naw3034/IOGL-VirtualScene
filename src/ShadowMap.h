@@ -1,8 +1,3 @@
-//-----------------------------------------------------------------------------
-// Shadow mapping for the directional light (sun / moon)
-// Pass 1: the scene is rendered from the light into a depth texture.
-// Pass 2: the lighting shader compares each fragment depth with the map (PCF).
-//-----------------------------------------------------------------------------
 #ifndef SHADOW_MAP_H
 #define SHADOW_MAP_H
 
@@ -19,11 +14,10 @@ public:
 
 	bool init();
 
-	// Orthographic light camera covering the square, looking along lightDir
 	void update(const glm::vec3& lightDir, const glm::vec3& center, float radius);
 
-	void begin();	// binds the FBO, sets the viewport and clears depth
-	void end();		// restores the default framebuffer
+	void begin();
+	void end();
 
 	void bindTexture(GLuint unit) const;
 	const glm::mat4& lightSpaceMatrix() const { return mLightSpace; }
@@ -35,4 +29,4 @@ private:
 	glm::mat4 mLightSpace{ 1.0f };
 };
 
-#endif // SHADOW_MAP_H
+#endif

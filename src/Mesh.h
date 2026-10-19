@@ -1,11 +1,3 @@
-//-----------------------------------------------------------------------------
-// Mesh class
-// Based on the course "Introduction to Modern OpenGL" mesh class, extended:
-//  - OBJ faces with any number of vertices (triangulated as a fan)
-//  - all index formats: v, v/vt, v//vn, v/vt/vn, negative (relative) indices
-//  - flat normals computed when the file has none
-//  - procedural plane generation (used for the ground)
-//-----------------------------------------------------------------------------
 #ifndef MESH_H
 #define MESH_H
 
@@ -42,10 +34,10 @@ private:
 	void initBuffers();
 
 	bool mLoaded;
-	std::vector<Vertex> mVertices;	// CPU copy, released once uploaded to the GPU
+	std::vector<Vertex> mVertices;
 	size_t mVertexCount;
 	GLuint mVBO, mVAO;
 	glm::vec3 mMin, mMax;
 };
 
-#endif // MESH_H
+#endif

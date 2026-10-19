@@ -1,12 +1,9 @@
-//-----------------------------------------------------------------------------
-// Bloom step 2: separable gaussian blur (9 taps, horizontal OR vertical)
-//-----------------------------------------------------------------------------
 #version 330 core
 
 in vec2 uv;
 
 uniform sampler2D image;
-uniform vec2 direction;		// one texel along x or y (scaled)
+uniform vec2 direction;
 
 out vec4 frag_color;
 

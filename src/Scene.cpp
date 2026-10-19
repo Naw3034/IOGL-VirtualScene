@@ -1,7 +1,3 @@
-//-----------------------------------------------------------------------------
-// Scene: "La petite place" - a small paved square with a robot statue,
-// lanterns, a storage corner, a bowling game and some wandering animals.
-//-----------------------------------------------------------------------------
 #include "Scene.h"
 
 #include <cmath>
@@ -28,7 +24,6 @@ namespace
 		return t * t * (3.0f - 2.0f * t);
 	}
 
-	// Cheap smooth pseudo-random signal in [0,1] used for flickering flames
 	float flicker(float t, float seed)
 	{
 		return 0.5f + 0.25f * sinf(t * 7.3f + seed * 13.1f) + 0.15f * sinf(t * 17.9f + seed * 5.7f)
@@ -38,13 +33,10 @@ namespace
 	const glm::vec3 LANTERN_COLOR(1.0f, 0.62f, 0.28f);
 	const glm::vec3 LAMP_COLOR(0.55f, 0.75f, 1.0f);
 	const glm::vec3 WISP_COLORS[2] = { glm::vec3(1.0f, 0.25f, 0.85f), glm::vec3(0.2f, 0.95f, 1.0f) };
-	const glm::vec3 PIN_LANE(5.0f, 0.0f, -3.0f);	// position of the head pin
+	const glm::vec3 PIN_LANE(5.0f, 0.0f, -3.0f);
 	const float BALL_START_Z = 3.5f;
 }
 
-//-----------------------------------------------------------------------------
-// Resource caches (a mesh / texture used several times is loaded once)
-//-----------------------------------------------------------------------------
 Mesh* Scene::mesh(const std::string& file)
 {
 	auto it = mMeshes.find(file);
@@ -62,7 +54,7 @@ Texture2D* Scene::texture(const std::string& file)
 	if (it != mTextures.end()) return it->second.get();
 	auto t = std::make_unique<Texture2D>();
 	if (!t->loadTexture(resourcePath("assets/textures/" + file)))
-		t->createSolidColor(glm::vec4(1, 0, 1, 1));	// magenta = missing texture
+		t->createSolidColor(glm::vec4(1, 0, 1, 1));
 	Texture2D* ptr = t.get();
 	mTextures[file] = std::move(t);
 	return ptr;
@@ -89,15 +81,11 @@ SceneObject& Scene::add(const std::string& name, const std::string& meshFile, Ma
 	return mObjects.back();
 }
 
-//-----------------------------------------------------------------------------
-// Builds the scene
-//-----------------------------------------------------------------------------
 bool Scene::load()
 {
 	mWhite.createSolidColor(glm::vec4(1.0f));
 	mBlack.createSolidColor(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
-	// --- Materials ----------------------------------------------------------
 	Material* ground = newMaterial();
 	ground->diffuseMap = texture("tile_floor.jpg");
 	ground->specular = glm::vec3(0.15f);
@@ -116,7 +104,7 @@ bool Scene::load()
 
 	Material* barrel = newMaterial();
 	barrel->diffuseMap = texture("barrel_diffuse.png");
-	barrel->specularMap = texture("barrel_spec.png");	// metal rings shine, wood does not
+	barrel->specularMap = texture("barrel_spec.png");
 	barrel->specular = glm::vec3(1.2f);
 	barrel->shininess = 64.0f;
 
@@ -168,11 +156,9 @@ bool Scene::load()
 		mWispMat[i]->emissive = WISP_COLORS[i] * 6.0f;
 	}
 
-	// --- Ground: procedural 240 m plane, one floor tile every 2 m ----------
 	mGround.createPlane(240.0f, 120.0f);
 	add("ground", "", ground, glm::mat4(1.0f)).castShadow = false;
 
-	// --- Centre: robot statue on its pedestal ------------------------------
 	add("pedestal", "crate.obj", pedestal, S(glm::vec3(1.1f, 0.35f, 1.1f)));
 	mRobot = (int)mObjects.size();
 	add("robot", "robot.obj", robot, glm::mat4(1.0f));
@@ -183,11 +169,9 @@ bool Scene::load()
 		add("wisp", "light.obj", mWispMat[i], glm::mat4(1.0f)).castShadow = false;
 	}
 
-	// --- Four lanterns (CC0 model from the Khronos glTF samples) -----------
 	const glm::vec3 lanternPos[4] = { {9, 0, 9}, {-9, 0, 9}, {-9, 0, -9}, {9, 0, -9} };
 	for (const glm::vec3& p : lanternPos)
 	{
-		// The lantern arm points along local +X: turn it towards the centre
 		glm::vec3 d = glm::normalize(-p);
 		float angle = glm::degrees(atan2f(-d.z, d.x));
 		glm::mat4 m = T(p) * Ry(angle);
@@ -196,7 +180,6 @@ bool Scene::load()
 		mLanternLightPos.push_back(glm::vec3(m * glm::vec4(1.92f, 3.55f, 0.0f, 1.0f)));
 	}
 
-	// --- Two old lamp posts (course model) on the sides --------------------
 	const glm::vec3 lampPos[2] = { {-14, 0, 0}, {14, 0, 0} };
 	for (const glm::vec3& p : lampPos)
 	{
@@ -206,7 +189,6 @@ bool Scene::load()
 		mLampLightPos.push_back(p + glm::vec3(0, 3.85f, 0));
 	}
 
-	// --- Storage corner: barrels and wooden crates -------------------------
 	add("barrel", "barrel.obj", barrel, T({ -6.0f, 0, -4.6f }) * Ry(20) * S(0.3f));
 	add("barrel", "barrel.obj", barrel, T({ -7.0f, 0, -5.3f }) * Ry(75) * S(0.3f));
 	add("barrel", "barrel.obj", barrel, T({ -6.3f, 0, -6.1f }) * Ry(140) * S(0.3f));
@@ -218,7 +200,6 @@ bool Scene::load()
 	add("crate", "woodcrate.obj", woodcrate, T({ 8.4f, 0, 4.2f }) * Ry(-20) * S(0.35f));
 	add("barrel", "barrel.obj", barrel, T({ 6.6f, 0, 6.0f }) * Ry(-50) * S(0.3f));
 
-	// --- Bowling game: 10 pins in a triangle + a ball ----------------------
 	for (int row = 0; row < 4; ++row)
 	{
 		for (int i = 0; i <= row; ++i)
@@ -232,13 +213,11 @@ bool Scene::load()
 	mBall = (int)mObjects.size();
 	add("ball", "light.obj", ball, glm::mat4(1.0f));
 
-	// --- Animals -----------------------------------------------------------
 	mBunny = (int)mObjects.size();
 	add("bunny", "bunny.obj", bunny, glm::mat4(1.0f));
 	mFox = (int)mObjects.size();
-	add("fox", "fox.obj", fox, glm::mat4(1.0f));	// CC0 / CC-BY model (Khronos samples)
+	add("fox", "fox.obj", fox, glm::mat4(1.0f));
 
-	// --- Lights ------------------------------------------------------------
 	mPointLights.resize(MAX_POINT_LIGHTS);
 	for (int i = 0; i < 4; ++i)
 	{
@@ -272,15 +251,11 @@ size_t Scene::triangleCount() const
 	return n;
 }
 
-//-----------------------------------------------------------------------------
-// Per-frame update
-//-----------------------------------------------------------------------------
 void Scene::update(float animTime, const RenderSettings& settings)
 {
 	updateEnvironment(settings.timeOfDay);
 	animateObjects(animTime);
 
-	// Lanterns: warm flickering flames, switched on at dusk
 	for (int i = 0; i < 4; ++i)
 	{
 		float f = 0.85f + 0.3f * flicker(animTime, (float)i);
@@ -289,7 +264,6 @@ void Scene::update(float animTime, const RenderSettings& settings)
 	}
 	mLanternMat->emissive = LANTERN_COLOR * 5.0f * mEnv.lampsOn * (0.9f + 0.2f * flicker(animTime, 1.5f));
 
-	// Lamp posts: cold steady light
 	for (int i = 0; i < 2; ++i)
 	{
 		mPointLights[4 + i].diffuse = LAMP_COLOR * 2.2f * mEnv.lampsOn;
@@ -297,7 +271,6 @@ void Scene::update(float animTime, const RenderSettings& settings)
 	}
 	mBulbMat->emissive = LAMP_COLOR * 6.0f * mEnv.lampsOn;
 
-	// Wisps: coloured lights orbiting the robot (always on)
 	for (int i = 0; i < 2; ++i)
 	{
 		mPointLights[6 + i].position = glm::vec3(mObjects[mWisps[i]].transform[3]);
@@ -310,17 +283,13 @@ void Scene::update(float animTime, const RenderSettings& settings)
 	mFlashlight.on = settings.flashlight;
 }
 
-//-----------------------------------------------------------------------------
-// Day / night cycle: sun & moon position, sky colours, fog, ambient light
-//-----------------------------------------------------------------------------
 void Scene::updateEnvironment(float tod)
 {
-	// The sun rises in the east (+X) at 6h, culminates at 12h, sets at 18h
 	float angle = (tod - 6.0f) / 24.0f * 2.0f * PI;
 	mEnv.sunDir = glm::normalize(glm::vec3(cosf(angle), sinf(angle) * 0.9f, 0.45f));
 	mEnv.moonDir = glm::normalize(glm::vec3(-mEnv.sunDir.x, -mEnv.sunDir.y, -0.35f));
 
-	float e = mEnv.sunDir.y;	// sun elevation (-1..1)
+	float e = mEnv.sunDir.y;
 	float day = smooth(-0.05f, 0.3f, e);
 	float night = 1.0f - smooth(-0.25f, 0.0f, e);
 	float sunset = expf(-(e * e) / (0.22f * 0.22f));
@@ -338,8 +307,6 @@ void Scene::updateEnvironment(float tod)
 		+ glm::vec3(0.08f, 0.04f, 0.02f) * sunset;
 	mEnv.exposure = glm::mix(1.3f, 1.8f, night);
 
-	// Main directional light = sun by day, moon by night. Both fade to zero at
-	// the horizon so the switch between the two is invisible.
 	glm::vec3 sunColor = glm::mix(glm::vec3(1.0f, 0.45f, 0.18f), glm::vec3(1.0f, 0.95f, 0.88f), smooth(0.0f, 0.45f, e));
 	mEnv.sunColor = sunColor;
 	if (e > 0.0f)
@@ -355,16 +322,11 @@ void Scene::updateEnvironment(float tod)
 	mMainLight.specular = mMainLight.diffuse;
 }
 
-//-----------------------------------------------------------------------------
-// Procedural animations
-//-----------------------------------------------------------------------------
 void Scene::animateObjects(float t)
 {
-	// Robot: slowly turns on its pedestal and floats a little
 	float bob = 0.06f * sinf(t * 1.5f);
 	mObjects[mRobot].transform = T({ 0.0f, 0.7f + 0.06f + bob, 0.0f }) * Ry(t * 25.0f) * S(0.33f);
 
-	// Wisps: two glowing spheres orbiting the robot
 	for (int i = 0; i < 2; ++i)
 	{
 		float a = t * 0.9f + i * PI;
@@ -372,21 +334,18 @@ void Scene::animateObjects(float t)
 		mObjects[mWisps[i]].transform = T(p) * S(0.35f);
 	}
 
-	// Bunny: hops clockwise around the statue
 	{
 		const float R = 4.2f, speed = -0.22f, hopPeriod = 0.55f;
 		float a = t * speed;
 		glm::vec3 p(R * cosf(a), 0.0f, R * sinf(a));
 		float phase = fmodf(t, hopPeriod) / hopPeriod;
 		p.y = 0.35f * sinf(phase * PI);
-		glm::vec3 v(-sinf(a) * speed, 0.0f, cosf(a) * speed);	// velocity
+		glm::vec3 v(-sinf(a) * speed, 0.0f, cosf(a) * speed);
 		float heading = glm::degrees(atan2f(v.x, v.z));
-		// The Stanford bunny looks towards -X in its file: rotate it to face +Z first
 		float squash = 1.0f + 0.12f * sinf(phase * 2.0f * PI);
 		mObjects[mBunny].transform = T(p) * Ry(heading) * Ry(90.0f) * S(glm::vec3(0.19f, 0.19f * squash, 0.19f));
 	}
 
-	// Fox: walks anticlockwise around the square (between bunny and lanterns)
 	{
 		const float R = 7.0f, speed = 0.11f;
 		float a = t * speed + 1.0f;
@@ -397,11 +356,10 @@ void Scene::animateObjects(float t)
 		mFoxPos = p;
 	}
 
-	// Bowling: every 12 s a ball rolls into the pins, which fall and reset
 	{
 		const float period = 12.0f, impact = 2.5f;
 		float u = fmodf(t + 0.5f, period);
-		const float r = 0.22f;		// ball radius
+		const float r = 0.22f;
 		float frontZ = PIN_LANE.z + 0.15f;
 		float z, scale = 1.0f;
 		if (u < impact)
@@ -409,7 +367,7 @@ void Scene::animateObjects(float t)
 		else
 		{
 			float k = glm::min((u - impact) / 1.5f, 1.0f);
-			z = frontZ - 1.6f * (1.0f - (1.0f - k) * (1.0f - k));	// slows down
+			z = frontZ - 1.6f * (1.0f - (1.0f - k) * (1.0f - k));
 		}
 		if (u > 9.0f && u < 10.5f) scale = 0.0f;
 		else if (u >= 10.5f) { scale = smooth(10.5f, 11.0f, u); z = BALL_START_Z; }
@@ -432,9 +390,6 @@ void Scene::animateObjects(float t)
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Rendering
-//-----------------------------------------------------------------------------
 void Scene::applyLights(ShaderProgram& shader) const
 {
 	mMainLight.apply(shader, "sunLight");
@@ -457,7 +412,7 @@ void Scene::draw(ShaderProgram& shader, bool depthOnly) const
 	for (const SceneObject& o : mObjects)
 	{
 		if (!o.visible || (depthOnly && !o.castShadow)) continue;
-		if (o.transform[0][0] == 0.0f && o.transform[1][1] == 0.0f) continue;	// scaled to zero
+		if (o.transform[0][0] == 0.0f && o.transform[1][1] == 0.0f) continue;
 
 		shader.setUniform("model", o.transform);
 		if (!depthOnly)

@@ -1,6 +1,3 @@
-//-----------------------------------------------------------------------------
-// HDR rendering + bloom + tone mapping
-//-----------------------------------------------------------------------------
 #include "PostProcessor.h"
 
 #include <iostream>
@@ -34,7 +31,7 @@ bool PostProcessor::init(int width, int height)
 	ok = mBlur.loadShaders(resourcePath("shaders/fullscreen.vert").c_str(), resourcePath("shaders/blur.frag").c_str()) && ok;
 	ok = mComposite.loadShaders(resourcePath("shaders/fullscreen.vert").c_str(), resourcePath("shaders/composite.frag").c_str()) && ok;
 
-	glGenVertexArrays(1, &mEmptyVAO);	// a core profile needs a VAO even without attributes
+	glGenVertexArrays(1, &mEmptyVAO);
 	mWidth = width;
 	mHeight = height;
 	createTargets();
@@ -44,7 +41,7 @@ bool PostProcessor::init(int width, int height)
 void PostProcessor::resize(int width, int height)
 {
 	if (width == mWidth && height == mHeight) return;
-	if (width <= 0 || height <= 0) return;	// minimised window
+	if (width <= 0 || height <= 0) return;
 	mWidth = width;
 	mHeight = height;
 	destroyTargets();
@@ -53,7 +50,6 @@ void PostProcessor::resize(int width, int height)
 
 void PostProcessor::createTargets()
 {
-	// HDR scene buffer
 	mHdrColor = makeColorTexture(mWidth, mHeight);
 	glGenRenderbuffers(1, &mHdrDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, mHdrDepth);
@@ -66,7 +62,6 @@ void PostProcessor::createTargets()
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cerr << "HDR framebuffer is incomplete" << std::endl;
 
-	// Half resolution bloom buffers
 	for (int i = 0; i < 2; ++i)
 	{
 		mBloomTex[i] = makeColorTexture(mWidth / 2, mHeight / 2);
@@ -105,11 +100,10 @@ void PostProcessor::drawFullscreenTriangle() const
 void PostProcessor::endScene(const PostSettings& s)
 {
 	glDisable(GL_DEPTH_TEST);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	// wireframe must not affect the post passes
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	if (s.bloom)
 	{
-		// Bright pass (downsample to half resolution)
 		glViewport(0, 0, mWidth / 2, mHeight / 2);
 		glBindFramebuffer(GL_FRAMEBUFFER, mBloomFBO[0]);
 		mBright.use();
@@ -118,7 +112,6 @@ void PostProcessor::endScene(const PostSettings& s)
 		glBindTexture(GL_TEXTURE_2D, mHdrColor);
 		drawFullscreenTriangle();
 
-		// Gaussian blur, alternating horizontal and vertical passes
 		mBlur.use();
 		mBlur.setUniformSampler("image", 0);
 		const int passes = 8;
@@ -127,13 +120,12 @@ void PostProcessor::endScene(const PostSettings& s)
 			int src = i % 2, dst = 1 - src;
 			glBindFramebuffer(GL_FRAMEBUFFER, mBloomFBO[dst]);
 			glm::vec2 dir = (i % 2 == 0) ? glm::vec2(1.0f / (mWidth / 2), 0.0f) : glm::vec2(0.0f, 1.0f / (mHeight / 2));
-			mBlur.setUniform("direction", dir * (1.0f + (float)(i / 2)));	// growing radius
+			mBlur.setUniform("direction", dir * (1.0f + (float)(i / 2)));
 			glBindTexture(GL_TEXTURE_2D, mBloomTex[src]);
 			drawFullscreenTriangle();
 		}
 	}
 
-	// Composite to the screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, mWidth, mHeight);
 	mComposite.use();

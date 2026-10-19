@@ -1,17 +1,3 @@
-//-----------------------------------------------------------------------------
-// IOGL homework - "La petite place"
-// A small virtual square rendered with modern OpenGL 3.3:
-//   OBJ models, Blinn-Phong lighting (directional + 8 point lights + spot),
-//   shadow mapping, procedural sky with day/night cycle, fog, HDR + bloom,
-//   particles, animated objects, free / orbit / cinematic cameras.
-//
-// Usage:
-//   VirtualScene                       interactive mode (press H for help)
-//   VirtualScene --demo                plays the scripted presentation
-//   VirtualScene --record video.mp4    renders the presentation to a video (needs ffmpeg)
-//        [--size 1920x1080] [--fps 60] [--start 10] [--end 20]
-//   VirtualScene --fullscreen
-//-----------------------------------------------------------------------------
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
